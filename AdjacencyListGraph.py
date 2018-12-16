@@ -174,13 +174,13 @@ class AdjacencyListGraph:
         for node in self.adjacency_list:
             degree = len(node)
             excess_degree = degree - 1
-            variance += (excess_degree - mean) ** 2
+            variance += ((excess_degree - mean) ** 2) * degree
         
         return variance / self.degree_count
     
-graph = AdjacencyListGraph('CatBrainEdgeList.dat')
-print(graph.assortativity_coefficient())
-
-            
+    def bfs(self):
+        
+    
+graph = AdjacencyListGraph('CatBrainEdgeList.dat')            
             
             
