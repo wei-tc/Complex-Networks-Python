@@ -1,10 +1,9 @@
 import pandas as pd
 import numpy as np
 
+from collections import deque
 from random import randint
 from random import shuffle
-
-
 
 class AdjacencyListGraph:
     def __init__(self, filename, delimiter='  ', undirected=True):
@@ -147,7 +146,7 @@ class AdjacencyListGraph:
         for node in range(self.node_count):
             degree_Ki = len(self.adjacency_list[node])
             
-            for nb in range(len(self.adjacency_list[node]):
+            for nb in range(len(self.adjacency_list[node])):
                 neighbour = self.adjacency_list[node][nb]
                 degree_Kj = len(self.adjacency_list[neighbour])
                 
@@ -178,9 +177,55 @@ class AdjacencyListGraph:
         
         return variance / self.degree_count
     
-    def bfs(self):
-        
+    # PATH FINDING
     
-graph = AdjacencyListGraph('CatBrainEdgeList.dat')            
+    def all_shortest_path_lengths(self):
+        return [self.shortest_path_lengths(i) for i in range(self.node_count)]
+        
+    def shortest_path_lengths(self, source):
+        distances = [-1] * self.node_count
+        distances[source] = 0
+        
+        q = deque([source])
+        
+        while q:
+            node = q.pop()
+            distance = distances[node]
+            
+            for neighbour in self.adjacency_list[node]:
+                if distances[neighbour] == -1:
+                    distances[neighbour] = distance + 1
+                    q.appendleft(neighbour)
+        
+        return distances
+    
+    def mean_shortest_path_length(self):
+        all_distances = self.all_shortest_path_lengths()
+        
+        total = 0
+        total_path_count = 0
+        
+        for distances in all_distances:
+            for d in distances:
+                if d > 0: # exclude starting node and unvisited nodes
+                    total += d
+                    total_path_count += 1
+        
+        return total / total_path_count
+    
+    def diameter(self):
+        all_distances = self.all_shortest_path_lengths()
+        
+        diameter = -1
+        for distances in all_distances:
+            for d in distances:
+                if d > diameter:
+                    diameter = d
+        
+        return diameter    
+    
+graph = AdjacencyListGraph('CatBrainEdgeList.dat')  
+print(graph.diameter())          
+
             
             
