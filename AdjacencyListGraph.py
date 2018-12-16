@@ -51,6 +51,8 @@ class AdjacencyListGraph:
             self.edge_count += 1
         
         self.degree_count = self.edge_count * 2
+    
+    # NETWORK TRANSFORMATIONS
         
     def to_gnm_network(self):
         gnm = [[] for _ in range(self.node_count)]
@@ -80,6 +82,8 @@ class AdjacencyListGraph:
         
         return [sorted(row) for row in configuration_model]
     
+    # DEGREE DISTRIBUTIONS
+    
     def degree_distribution(self):
         return [len(row) for row in self.adjacency_list]
     
@@ -91,6 +95,9 @@ class AdjacencyListGraph:
     
     def mean_degree_distribution(self):
         return np.array(self.degree_distribution()).mean()
+
+    
+    
     
 graph = AdjacencyListGraph('CatBrainEdgeList.dat')
 print(graph.mean_degree_distribution())
