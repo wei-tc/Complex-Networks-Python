@@ -50,6 +50,7 @@ class AdjacencyListGraph:
             
             self.edge_count += 1
         
+        self.adjacency_list = [sorted(row) for row in self.adjacency_list]
         self.degree_count = self.edge_count * 2
     
     # NETWORK TRANSFORMATIONS
@@ -96,11 +97,50 @@ class AdjacencyListGraph:
     def mean_degree_distribution(self):
         return np.array(self.degree_distribution()).mean()
 
+    # CLUSTERING COEFFICIENTS
     
+    def local_clustering_coefficients(self):
+        clustering_coefs = [0.0 for _ in range(self.node_count)]
+        
+        for node in range(self.node_count):
+            triads = 0
+            triangles = 0
+            
+            for nb in range(len(self.adjacency_list[node])):
+                neighbour = self.adjacency_list[node][nb]
+                
+                # skip reflexive edges (self-loops), which cannot form triads
+                is_reflexive_edge = (node == neighbour)
+                if is_reflexive_edge:
+                    continue
+                
+                # skip duplicate edges. this assumes every vector within 
+                # adjacency list is sorted
+                is_duplicate_edge = (neighbour == self.adjacency_list[node][nb - 1])
+                if nb != 0 and is_duplicate_edge:
+                    # since nb =0 is the first neighbour in the adjacency list
+                    # for that particular node, it cannot be a duplicate edge
+                    continue
     
+                # loop over higher neighbours
+                num_neighbours = len(self.adjacency_list[node])
+                for high in range(nb+1, num_neighbours):
+                    higher_neighbour = self.adjacency_list[node][high]
+                    triads += 1
+                    
+                    if higher_neighbour in self.adjacency_list[neighbour]:
+                        triangles += 1
+            
+            clustering_coefs[node] = triangles / triads if triangles != 0 and triads != 0 else 0
+    
+        return clustering_coefs
+
+    def mean_local_clustering_coefficient(self):
+        return np.array(self.local_clustering_coefficients()).mean()
     
 graph = AdjacencyListGraph('CatBrainEdgeList.dat')
-print(graph.mean_degree_distribution())
+print(graph.mean_local_clustering_coefficient())
+
 
             
             
