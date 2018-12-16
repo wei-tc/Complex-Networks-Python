@@ -79,9 +79,21 @@ class AdjacencyListGraph:
             configuration_model[tgt].append(src)
         
         return [sorted(row) for row in configuration_model]
-        
+    
+    def degree_distribution(self):
+        return [len(row) for row in self.adjacency_list]
+    
+    def normalised_degree_distribution(self):
+        return [len(row)/self.node_count for row in self.adjacency_list]
+    
+    def variance_degree_distribution(self):
+        return np.array(self.degree_distribution()).var()
+    
+    def mean_degree_distribution(self):
+        return np.array(self.degree_distribution()).mean()
+    
 graph = AdjacencyListGraph('CatBrainEdgeList.dat')
-
+print(graph.mean_degree_distribution())
 
             
             
