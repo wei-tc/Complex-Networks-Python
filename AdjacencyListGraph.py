@@ -69,8 +69,8 @@ class AdjacencyListGraph:
     def to_configuration_model(self):
         stubs = []
         for i, node in enumerate(self.adjacency_list):
-            num_neighbours = len(node)
-            stubs.append([i] * num_neighbours)    
+            degree = len(node)
+            stubs.append([i] * degree)    
         stubs = [i for row in stubs for i in row] # flatten
         shuffle(stubs)
         
@@ -123,8 +123,8 @@ class AdjacencyListGraph:
                     continue
     
                 # loop over higher neighbours
-                num_neighbours = len(self.adjacency_list[node])
-                for high in range(nb+1, num_neighbours):
+                degree = len(self.adjacency_list[node])
+                for high in range(nb+1, degree):
                     higher_neighbour = self.adjacency_list[node][high]
                     triads += 1
                     
@@ -138,9 +138,48 @@ class AdjacencyListGraph:
     def mean_local_clustering_coefficient(self):
         return np.array(self.local_clustering_coefficients()).mean()
     
+    # ASSORTATIVITY COEFFICIENT
+    def assortativity_coefficient(self):
+        mean = self.mean_excess_degree()
+        variance = self.variance_excess_degree()
+        
+        excess_KiKj = 0
+        for node in range(self.node_count):
+            degree_Ki = len(self.adjacency_list[node])
+            
+            for nb in range(len(self.adjacency_list[node]):
+                neighbour = self.adjacency_list[node][nb]
+                degree_Kj = len(self.adjacency_list[neighbour])
+                
+                excess_Ki = degree_Ki - 1
+                excess_Kj = degree_Kj - 1
+                excess_KiKj = (excess_Ki * excess_Kj)
+    
+        return ((excess_KiKj / self.degree_count) - mean ** 2) / variance
+    
+    def mean_excess_degree(self):
+        total = 0
+        
+        for node in self.adjacency_list:
+            degree = len(node)
+            excess_degree = degree - 1
+            total += (degree * excess_degree)
+        
+        return total / self.degree_count
+    
+    def variance_excess_degree(self):
+        variance = 0
+        mean = self.mean_excess_degree()
+        
+        for node in self.adjacency_list:
+            degree = len(node)
+            excess_degree = degree - 1
+            variance += (excess_degree - mean) ** 2
+        
+        return variance / self.degree_count
+    
 graph = AdjacencyListGraph('CatBrainEdgeList.dat')
-print(graph.mean_local_clustering_coefficient())
-
+print(graph.assortativity_coefficient())
 
             
             
