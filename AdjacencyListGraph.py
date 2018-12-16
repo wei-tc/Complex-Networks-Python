@@ -62,23 +62,6 @@ class AdjacencyListGraph:
             gnm[tgt].append(src)
         
         return [sorted(row) for row in gnm] 
-    
-    def to_configuration_model(self):
-        stubs = []
-        for i, node in enumerate(self.adjacency_list):
-            num_neighbours = len(node)
-            stubs.append([i] * num_neighbours)    
-        stubs = [i for row in stubs for i in row] # flatten
-        shuffle(stubs)
-        
-        configuration_model = [[] for _ in range(self.node_count)]
-        for i in range(0, len(stubs), 2):
-            src = stubs[i]
-            tgt = stubs[i+1]
-            configuration_model[src].append(tgt)
-            configuration_model[tgt].append(src)
-        
-        return [sorted(row) for row in configuration_model]
         
 graph = AdjacencyListGraph('CatBrainEdgeList.dat')
 
