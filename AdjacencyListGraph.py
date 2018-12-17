@@ -280,7 +280,6 @@ class AdjacencyListGraph:
         
         white_neighbour = None
         grey_neighbour = None
-        target_neighbour = None
         
         for neighbour in neighbours:
             colour = colours[neighbour]
@@ -288,10 +287,10 @@ class AdjacencyListGraph:
             if neighbour == target:
                 return target
             
-            if colour == white: 
+            if colour == self.white: 
                 white_neighbour = neighbour
             
-            if colour == grey: 
+            if colour == self.grey: 
                 grey_neighbour = neighbour
             
         if white_neighbour != None:
@@ -337,7 +336,9 @@ class AdjacencyListGraph:
         
     # ONION AND K-CORE DECOMPOSITION
     
+    
 graph = AdjacencyListGraph('CatBrainEdgeList.dat')       
+
 
             
             
