@@ -1,11 +1,16 @@
 import pandas as pd
 import numpy as np
+import time
 
 from collections import deque
 from random import randint
 from random import shuffle
 
 class AdjacencyListGraph:
+    white = 0
+    grey = 1
+    black = 2
+    
     def __init__(self, filename, delimiter='  ', undirected=True):
         self.degree_count = 0
         self.edge_count = 0
@@ -224,8 +229,115 @@ class AdjacencyListGraph:
         
         return diameter    
     
-graph = AdjacencyListGraph('CatBrainEdgeList.dat')  
-print(graph.diameter())          
+    # CLOSENESS CENTRALITY
+    
+    def all_closeness_centrality(self):
+        return [self.closeness_centrality(node) for node in range(self.node_count)]
+    
+    def closeness_centrality(self, node):
+        distances = self.shortest_path_lengths(node)
+        
+        total = 0
+        num_distances = 0
+        
+        for d in distances:
+            if d > 0:
+                total += d
+                num_distances += 1
+        
+        return num_distances / total
+    
+    # LOCAL SEARCH
+    
+    def self_avoiding_degree_seeking_local_search(self, source, target):
+        current = source
+        colours = [self.white] * self.node_count
+        local_search = []
+        
+        while current != target:
+            local_search.append(current)
+            self.__set_colours(colours, current)
+            current = self.__target_or_random_highest_degree_white_grey_neighbour(colours, 
+                                                                                  current, 
+                                                                                  target)
+        local_search.append(current)
+        return local_search
+    
+    def __set_colours(self, colours, current):
+        is_all_visited = True
+        for neighbour in self.adjacency_list[current]:
+            if colours[neighbour] == self.white:
+                is_all_visited = False
+                break
+        
+        colours[current] = self.black if is_all_visited else self.grey
+    
+    def __target_or_random_highest_degree_white_grey_neighbour(self, colours, current, target):
+        # stable sort used to ensure randomnessis maintained where 
+        # there are multiple nodes of the same degree
+        neighbours = shuffle(self.adjacency_list[current])
+        neighbours.sort(key=lambda x, y: len(self.adjacency_list[x]) > len(self.adjacency_list[y]))
+        
+        white_neighbour = None
+        grey_neighbour = None
+        target_neighbour = None
+        
+        for neighbour in neighbours:
+            colour = colours[neighbour]
+            
+            if neighbour == target:
+                return target
+            
+            if colour == white: 
+                white_neighbour = neighbour
+            
+            if colour == grey: 
+                grey_neighbour = neighbour
+            
+        if white_neighbour != None:
+            return white_neighbour
+        elif grey_neighbour != None:
+            return grey_neighbour
+        
+    def degree_biased_random_walk(self, source, target):
+        current = source
+        random_walk = []
+        
+        while current != target:
+            random_walk.append(current)
+            
+            is_target_neighbour = current in self.adjacency_list[target]
+            current = target if is_target_neighbour else self.__random_highest_degree_neighbour(current)
+        
+        random_walk.append(current) # target node
+        return random_walk
+    
+    def degree_biased_random_walk_by_duration(self, source, duration_seconds):
+        current = source
+        random_walk = []
+        
+        start = time.time()
+        elapsed = 0
+        while elapsed < duration_seconds:
+            current = self.__random_highest_degree_neighbour(current)
+            random_walk.append(current)
+            
+            current = time.time()
+            elapsed = current - start
+        
+        return random_walk
+    
+    def __random_highest_degree_neighbour(self, current):
+        neighbours = self.__degree_of_neighbours(current)
+        random_neighbour = randint(0, len(neighbours) - 1)
+        return neighbours[random_neighbour]
+    
+    def __degree_of_neighbours(self, current):
+        return [len(self.adjacency_list[neighbour]) for neighbour in self.adjacency_list[current]]
+        
+    # ONION AND K-CORE DECOMPOSITION
+    
+graph = AdjacencyListGraph('CatBrainEdgeList.dat')       
 
             
             
