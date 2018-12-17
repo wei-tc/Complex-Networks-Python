@@ -1,12 +1,14 @@
 import pandas as pd
 import numpy as np
 import time
+import sys
 
 from collections import deque
 from random import randint
 from random import shuffle
 
 class AdjacencyListGraph:
+    removed = -1
     white = 0
     grey = 1
     black = 2
@@ -336,9 +338,72 @@ class AdjacencyListGraph:
         
     # ONION AND K-CORE DECOMPOSITION
     
+    def onion_kcore(self):
+        nodes = list(range(self.node_count))
+        all_degrees = [len(node) for node in self.adjacency_list]
+        cores = [0] * self.node_count
+        layers = [0] * self.node_count
+        
+        core = 1
+        layer = 1
+        remaining_nodes = self.node_count
+        
+        while remaining_nodes > 0:
+            current_layer = self.__layer(nodes, all_degrees, core)
+            
+            for node in current_layer:
+                cores[node] = core
+                layers[node] = layer
+                
+                for neighbour in self.adjacency_list[node]:
+                    if nodes[neighbour] != self.removed:
+                        all_degrees[neighbour] -= 1
+            
+                nodes[node] = self.removed
+                all_degrees[node] = self.removed
+                remaining_nodes -= 1
+                
+            layer += 1
+            min_degree = self.__min_degree(all_degrees)
+            if min_degree >= core + 1:
+                core = min_degree
+        
+        return core, layer - 1 # -1 since last layer has no nodes
+            
+    def __layer(self, nodes, all_degrees, core):
+        layer = []
+        
+        for node in nodes:
+            if node == self.removed:
+                continue
+        
+            degree = all_degrees[node]
+            if degree <= core:
+                layer.append(node)
+        
+        return layer
     
-graph = AdjacencyListGraph('CatBrainEdgeList.dat')       
-
-
+    def __min_degree(self, all_degrees):
+        min_degree = sys.maxsize
+        
+        for degree in all_degrees:
+            if degree == self.removed:
+                continue
+            
+            if degree < min_degree:
+                min_degree = degree
+        
+        return min_degree if min_degree != sys.maxsize else self.removed
+    
+    def __onion_distribution(self, layers, max_layer):
+        onion = [0] * max_layer
+        
+        for layer in layers:
+            onion[layer - 1] += 1
+        
+        return onion
+    
+graph = AdjacencyListGraph('CatBrainEdgeList.dat') 
+print(graph.onion_kcore())      
             
             
