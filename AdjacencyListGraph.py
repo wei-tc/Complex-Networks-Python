@@ -27,6 +27,9 @@ class AdjacencyListGraph:
         df = pd.read_csv(filename, delimiter=delimiter, names=[source, target], 
                           engine='python')
         
+        # node2idx mapping based on order of appearance in the data 
+        # means that whether nodes are 0 or 1 based indexing is irrelevant, but
+        # original node index is not preserved
         node2idx = {}
         idx = 0
         for i, row in df.iterrows():
@@ -41,6 +44,7 @@ class AdjacencyListGraph:
                 node2idx[tgt] = idx
                 idx += 1
         
+        # create adjacency list
         source_max = (df[source].max())
         target_max = (df[target].max())
         self.node_count = source_max if source_max > target_max else target_max
@@ -124,7 +128,7 @@ class AdjacencyListGraph:
                 # adjacency list is sorted
                 is_duplicate_edge = (neighbour == self.adjacency_list[node][nb - 1])
                 if nb != 0 and is_duplicate_edge:
-                    # since nb =0 is the first neighbour in the adjacency list
+                    # since nb = 0 is the first neighbour in the adjacency list
                     # for that particular node, it cannot be a duplicate edge
                     continue
     
@@ -145,6 +149,7 @@ class AdjacencyListGraph:
         return np.array(self.local_clustering_coefficients()).mean()
     
     # ASSORTATIVITY COEFFICIENT
+    
     def assortativity_coefficient(self):
         mean = self.mean_excess_degree()
         variance = self.variance_excess_degree()
@@ -153,7 +158,7 @@ class AdjacencyListGraph:
         for node in range(self.node_count):
             degree_Ki = len(self.adjacency_list[node])
             
-            for nb in range(len(self.adjacency_list[node])):
+            for nb in range(degree_Ki):
                 neighbour = self.adjacency_list[node][nb]
                 degree_Kj = len(self.adjacency_list[neighbour])
                 
@@ -267,6 +272,7 @@ class AdjacencyListGraph:
     
     def __set_colours(self, colours, current):
         is_all_visited = True
+        
         for neighbour in self.adjacency_list[current]:
             if colours[neighbour] == self.white:
                 is_all_visited = False
